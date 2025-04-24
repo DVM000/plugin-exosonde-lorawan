@@ -12,11 +12,21 @@ import zlib
 import logging
 import argparse
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(message)s',
-    datefmt='%Y/%m/%d %H:%M:%S')
+class Decoder: # This class is used to decode the data received from the sensor
 
+    def decode(self, payload):
+        # Decode the payload and return a dictionary with the decoded values in this structure:
+        # payload = {
+        #   measurements:[
+        #   {name:"<measurement name>",value:<measurement value>},
+        #   {name:"<measurement name>",value:<measurement value>}, ...
+        #   ]
+        # }
+        # This is a placeholder function. The actual decoding logic should be implemented here.
+        payload = {"measurements": []}
+        return payload
+
+# TODO: add the code below to the decoder class
 def get_data():
     # REPLACE BY ACTUAL CODE TO GET DATA
     # 1) single example
