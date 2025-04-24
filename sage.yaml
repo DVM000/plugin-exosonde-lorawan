@@ -1,0 +1,13 @@
+name: "plugin-exosonde-lorawan"
+version: "0.1.0"
+description: "Read parameters from EXO sonde via lorawan and publish data"
+keywords: ""
+authors: "Delia Velasco-Montero <delia@imse-cnm.csic.es>"
+collaborators: ""
+funding: ""
+license: ""
+homepage: ""
+source:
+  architectures:
+    - "linux/amd64"
+    - "linux/arm64"
