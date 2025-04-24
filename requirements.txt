@@ -1,6 +1,8 @@
 # for additional pywaggle install options, see: https://github.com/waggle-sensor/pywaggle#installation-guides
-pywaggle==0.56.0
+pywaggle==0.56.*
 numpy==1.26.4
 pandas==2.2.3
 crcmod==1.7
+paho-mqtt==1.6.1
+python-dateutil
 
