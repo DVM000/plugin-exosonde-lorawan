@@ -25,6 +25,15 @@ class Decoder: # This class is used to decode the data received from the sensor
         #   ]
         # }
         # This is a placeholder function. The actual decoding logic should be implemented here.
+        
+        if isinstance(payload, str):
+           try:
+               payload = bytes.fromhex(payload)
+               print("Converted to bytes: ", payload)
+           except Exception as e:
+               print("Error converting payload to bytes: ", e)
+               return {"error": "invalid hex string"}
+            
         self.crc8_func = crcmod.mkCrcFun(0x107, initCrc=0x00, rev=False)
         
         # Load lookup table for parameter names
