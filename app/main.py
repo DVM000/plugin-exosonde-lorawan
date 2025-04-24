@@ -55,9 +55,9 @@ def main():
         type=int
     )
     parser.add_argument(
-        "--publish-raw-payload",
-        default=os.getenv("PUBLISH_RAW_PAYLOAD", False),
-        help="publish raw payload to beehive",
+        "--dry-raw-payload",
+        default=os.getenv("DRY_RAW_PAYLOAD", False),
+        help="Pass flag to NOT publish raw payload to beehive",
         type=bool
     )
     

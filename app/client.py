@@ -80,8 +80,8 @@ class My_Client:
         #decode payload
         measurements = self.decoder.decode(payload)
 
-        # publish raw payload if requested
-        if self.args.publish_raw_payload:
+        # Don't publish raw payload if requested      
+        if not self.args.dry_raw_payload:
             measurements.append({"name": "raw_payload", "value": payload})
         
         for measurement in measurements:
