@@ -174,8 +174,10 @@ def main(args):
         logging.warning("No received data.")
         return 1
     
-    df_all = pd.concat(all_data, ignore_index=True)
-    
+    all_data_f = [df.dropna(axis=1, how='all') for df in all_data
+                    if isinstance(df, pd.DataFrame) and not df.empty]  # remove empty data or NaN 
+    df_all = pd.concat(all_data_f, ignore_index=True)
+  
     # Dictionary of dataframes per DATE-TIME measurement
     grouped_dfs = {
         f"{date}_{time}": group for (date,time),group in df_all.groupby(['Date', 'Time'])
