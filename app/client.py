@@ -91,9 +91,14 @@ class My_Client:
             return
         
         #decode payload
-        payload = base64.b64decode(payload)
-        decoded_payload = self.decoder.decode(payload)
+        base64_decoded_payload = base64.b64decode(payload)
+        decoded_payload = self.decoder.decode(base64_decoded_payload)
         measurements = decoded_payload.get("measurements", [])
+
+        # if measurements is empty, log and return
+        if not measurements:
+            logging.error(f"[MQTT CLIENT] No measurements returned from Decoder")
+            return
 
         # Don't publish raw payload if requested      
         if not self.args.dry_raw_payload:
