@@ -7,7 +7,7 @@ Extracted information is published to Waggle system.
 
 - CRC-8 validation to ensure packet integrity.
 - Decodes multiple measurement parameters from each packet and extract parameter names, units, and values.
-- Publishes encoded and compressed data.
+- Publishes encoded and compressed data, along with its actual measurement timestamp.
 
 ## Example Decoded Output
 

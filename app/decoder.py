@@ -2,7 +2,7 @@
 
 # Decoding data coming from EXO sensor via Arduino + loRaWAN
 import struct
-from datetime import datetime
+from datetime import datetime, timezone
 import pandas as pd
 import crcmod
 import os
@@ -36,25 +36,32 @@ class Decoder: # This class is used to decode the data received from the sensor
         # Decode parameters from packet
         date, time, version, device_id, df = self.process_packet(payload, lookup_dict)
         
-        # Build dictionary
+        # Get measurement timestamp ISO-8601
+        dt = datetime.strptime(date+'-'+time,'%d-%m-%Y-%H:%M:%S')
+        dt = dt.replace(tzinfo=timezone.utc) # UTC
+        timestamp = dt.isoformat(timespec='seconds')
+   
+        # Build dictionary of parameters
         measurements = [{"name": "device_id", "value": device_id, "unit": ""}, 
                         {"name": "version", "value": version, "unit": ""}]
                         
         for _, row in df.iterrows():
             if row['Status'] != "Available": # skip NaN values (status!=0)
                 continue
+                
             param_name = row['Parameter'].split(',')[0].replace(' ','_')
             try:
                 param_unit = row['Parameter'].split(',')[1].replace(' ','')
             except:
                 param_unit = ""
+                
             data = {"name": param_name, 
                     "value": row['Value'],
                     "unit": param_unit}
             measurements.append( data )
     
         payload = {"measurements": measurements}
-        return payload
+        return payload, timestamp
      
     def load_lookup_table(self, csv_file='./register_configuration.csv' ):
         # Load the correct lookup table from the uploaded CSV
