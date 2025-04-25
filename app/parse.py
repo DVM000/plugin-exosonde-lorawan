@@ -27,7 +27,7 @@ def Get_Measurement_metadata(message_dict):
         tmp_dict['deviceName'] = deviceInfo_dict['deviceName']
         tmp_dict['devEui'] = deviceInfo_dict['devEui']
     except:
-        logging.error("deviceInfo was not found")
+        logging.error("[Parser] deviceInfo was not found")
 
     #get tags
     tags_dict = deviceInfo_dict.get('tags', None)
@@ -73,7 +73,7 @@ def Get_Signal_Performance_values(message_dict):
             }
             tmp_dict['rxInfo'].append(temp)
     else:
-        logging.error("rxInfo was not found")
+        logging.error("[Parser] rxInfo was not found")
 
     txInfo_dict = message_dict.get('txInfo', None)
     if (
@@ -85,7 +85,7 @@ def Get_Signal_Performance_values(message_dict):
         tmp_dict['spreadingfactor'] = txInfo_dict['modulation']['lora']['spreadingFactor']
     else:
         tmp_dict['spreadingfactor'] = None
-        logging.error("spreadingFactor was not found")
+        logging.error("[Parser] spreadingFactor was not found")
 
     tmp_dict['fCnt'] = message_dict.get('fCnt', None)
 
@@ -100,7 +100,7 @@ def Get_Signal_Performance_metadata(message_dict):
         tmp_dict['deviceName'] = deviceInfo_dict['deviceName']
         tmp_dict['devEui'] = deviceInfo_dict['devEui']
     except:
-        logging.error("deviceInfo was not found")
+        logging.error("[Parser] deviceInfo was not found")
 
     #get tags
     tags_dict = deviceInfo_dict.get('tags', None)
@@ -119,7 +119,7 @@ def convert_time(iso_time):
     try:
         datetime_obj = parser.isoparse(iso_time)
     except ValueError as e:
-        logging.error(f"Error: {e}")
+        logging.error(f"[Parser] Error: {e}")
     else:
         # Convert the datetime object to nanoseconds since the epoch
         total_seconds = datetime_obj.timestamp()

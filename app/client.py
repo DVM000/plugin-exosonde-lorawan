@@ -37,20 +37,20 @@ class My_Client:
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            logging.info("Connected to MQTT broker")
+            logging.info("[MQTT CLIENT] Connected to MQTT broker")
             client.subscribe(self.args.mqtt_subscribe_topic)
         else:
-            logging.error(f"Connection to MQTT broker failed with code {rc}") 
+            logging.error(f"[MQTT CLIENT] Connection to MQTT broker failed with code {rc}") 
         return
 
     @staticmethod
     def on_subscribe(client, obj, mid, granted_qos):
-        logging.info("Subscribed: " + str(mid) + " " + str(granted_qos))
+        logging.info("[MQTT CLIENT] Subscribed: " + str(mid) + " " + str(granted_qos))
         return
 
     @staticmethod
     def on_log(client, obj, level, string):
-        logging.debug(string) #prints if args.debug = true
+        logging.debug(f"[MQTT CLIENT] on_log: {string}") #prints if args.debug = true
         return
 
     def publish_message(self, client, userdata, message):
@@ -60,7 +60,7 @@ class My_Client:
             metadata = parse_message_payload(message.payload.decode("utf-8"))
             payload = metadata["data"]
         except:
-            logging.error("Message did not contain data.")
+            logging.error("[MQTT CLIENT] Message did not contain data.")
             return
 
         #get chirpstack time and convert to time in nanoseconds
@@ -124,10 +124,10 @@ class My_Client:
                 try:
                     plugin.publish(measurement["name"], measurement["value"], timestamp=timestamp, meta=metadata)
                     # If the function succeeds, log a success message
-                    logging.info(f'{measurement["name"]} published')
+                    logging.info(f'[MQTT CLIENT] {measurement["name"]} published')
                 except Exception as e:
                     # If an exception is raised, log an error message
-                    logging.error(f'measurement {measurement["name"]} did not publish encountered an error: {str(e)}')
+                    logging.error(f'[MQTT CLIENT] measurement {measurement["name"]} did not publish encountered an error: {str(e)}')
         return
 
     def dry_message(self, client, userdata, message):
@@ -144,7 +144,7 @@ class My_Client:
         data = (
             "LORAWAN Message received: " + message.payload.decode("utf-8") + " with topic " + str(message.topic)
         )
-        logging.info(data) #log message received
+        logging.info(f"[MQTT CLIENT] {data}") #log message received
 
         return
 
@@ -154,7 +154,7 @@ class My_Client:
             metadata = parse_message_payload(message.payload.decode("utf-8"))
             measurements = metadata["object"]["measurements"]
         except:
-            logging.error("Message did not contain measurements.")
+            logging.error("[MQTT CLIENT] Message did not contain measurements.")
             return
 
         if self.args.signal_strength_indicators:
@@ -167,25 +167,25 @@ class My_Client:
                 continue
             if self.args.collect: #true if not empty
                 if measurement["name"] in self.args.collect: #if not empty only log measurements in list
-                    logging.info(str(measurement["name"]) + ": " + str(measurement["value"]))
+                    logging.info("[MQTT CLIENT] " + str(measurement["name"]) + ": " + str(measurement["value"]))
             else: #else collect is empty so log all measurements
-                    logging.info(str(measurement["name"]) + ": " + str(measurement["value"]))
+                    logging.info("[MQTT CLIENT] " + str(measurement["name"]) + ": " + str(measurement["value"]))
 
         if self.args.signal_strength_indicators:
             for val in Performance_vals['rxInfo']:
-                logging.info("gatewayId: " + str(val["gatewayId"]))
-                logging.info("  rssi: " + str(val["rssi"]))
-                logging.info("  snr: " + str(val["snr"]))
-            logging.info("spreading factor: " + str(Performance_vals["spreadingfactor"]))
+                logging.info("[MQTT CLIENT] gatewayId: " + str(val["gatewayId"]))
+                logging.info("[MQTT CLIENT]  rssi: " + str(val["rssi"]))
+                logging.info("[MQTT CLIENT]  snr: " + str(val["snr"]))
+            logging.info("[MQTT CLIENT] spreading factor: " + str(Performance_vals["spreadingfactor"]))
             pl,plr = self.plr_calc.process_packet(Performance_metadata['devEui'], Performance_vals['fCnt'])
-            logging.info(f"packet loss: {pl}")
+            logging.info(f"[MQTT CLIENT] packet loss: {pl}")
             if plr is not None:
-                logging.info(f"packet loss rate: {plr:.2f}%")
+                logging.info(f"[MQTT CLIENT] packet loss rate: {plr:.2f}%")
 
         return
 
     def run(self):
-        logging.info(f"connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
+        logging.info(f"[MQTT CLIENT] connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
         self.client.connect(host=self.args.mqtt_server_ip, port=self.args.mqtt_server_port, bind_address="0.0.0.0")
-        logging.info("waiting for callback...")
+        logging.info("[MQTT CLIENT] waiting for callback...")
         self.client.loop_forever()
