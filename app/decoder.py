@@ -44,7 +44,7 @@ class Decoder: # This class is used to decode the data received from the sensor
             if row['Status'] != "Available": # skip NaN values (status!=0)
                 continue
             data = {"name": row['Parameter'].replace(' ','_').split(',')[0], 
-                    "value": row['Value']},
+                    "value": row['Value']}
             measurements.append( data )
     
         payload = {"measurements": measurements}
