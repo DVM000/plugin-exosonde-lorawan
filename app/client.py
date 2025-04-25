@@ -108,7 +108,7 @@ class My_Client:
 
         # Don't publish raw payload if requested      
         if not self.args.dry_raw_payload:
-            measurements.append({"name": "raw_payload", "value": payload})
+            measurements.append({"name": "raw_payload", "value": payload, "unit": "base64"})
         
         for measurement in measurements:
             # Skip the measurement if it's in the ignore list
@@ -139,6 +139,7 @@ class My_Client:
         return
     
     def publish_measurement(self, measurement,timestamp,metadata):
+        metadata["unit"] = measurement["unit"] # add unit to metadata
         measurement = clean_message_measurement(measurement) #clean measurement names
         self.publish(measurement,timestamp,metadata)
         return
@@ -203,7 +204,18 @@ class My_Client:
         payload = base64.b64decode(payload)
         decoded_payload = self.decoder.decode(payload)
         measurements = decoded_payload.get("measurements", [])
-        measurements.append({"name": "raw_payload", "value": payload})
+
+        # Check measurements format
+        try:
+            self.check_measurements(measurements)
+        except ValueError as e:
+            logging.error(f"[MQTT CLIENT] {e}")
+            return
+
+        # if measurements is empty, log
+        if not measurements:
+            logging.debug(f"[MQTT CLIENT] No measurements returned from Decoder")   
+        measurements.append({"name": "raw_payload", "value": payload, "unit": "base64"})
 
         for measurement in measurements:
             # Skip the measurement if it's in the ignore list
@@ -211,9 +223,9 @@ class My_Client:
                 continue
             if self.args.collect: #true if not empty
                 if measurement["name"] in self.args.collect: #if not empty only log measurements in list
-                    logging.info("[MQTT CLIENT] " + str(measurement["name"]) + ": " + str(measurement["value"]))
+                    logging.info("[MQTT CLIENT] " + str(measurement["name"]) + ": " + str(measurement["value"]) + " unit: " + str(measurement["unit"]))
             else: #else collect is empty so log all measurements
-                    logging.info("[MQTT CLIENT] " + str(measurement["name"]) + ": " + str(measurement["value"]))
+                    logging.info("[MQTT CLIENT] " + str(measurement["name"]) + ": " + str(measurement["value"]) + " unit: " + str(measurement["unit"]))
 
         if self.args.signal_strength_indicators:
             for val in Performance_vals['rxInfo']:
@@ -231,12 +243,16 @@ class My_Client:
     def check_measurements(self,measurements):
         # log if measurements is not a list
         if not isinstance(measurements, list):
-            raise ValueError(f"Measurements returned from Decoder is not a list")
+            raise ValueError("Measurements returned from Decoder is not a list")
         
-        # Check if each item inside measurements is a dict with 'name' and 'value'
+        # Check if each item inside measurements is a dict with 'name', 'value', and 'unit'
         for idx, item in enumerate(measurements):
-            if not isinstance(item, dict) or "name" not in item or "value" not in item:
-                raise ValueError(f"Invalid measurement format at index {idx}: {item}")
+            if not isinstance(item, dict):
+                raise ValueError(f"Invalid measurement at index {idx}: Not a dictionary. Got: {type(item)}")
+            
+            missing_keys = [key for key in ["name", "value", "unit"] if key not in item]
+            if missing_keys:
+                raise ValueError(f"Invalid measurement format at index {idx}, missing keys: {missing_keys}. Got: {item}")
 
     def run(self):
         logging.info(f"[MQTT CLIENT] connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
