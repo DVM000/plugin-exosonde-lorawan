@@ -1,5 +1,6 @@
 import logging
 import os
+import base64
 import paho.mqtt.client as mqtt
 from waggle.plugin import Plugin
 from parse import *
@@ -90,6 +91,7 @@ class My_Client:
             return
         
         #decode payload
+        payload = base64.b64decode(payload)
         decoded_payload = self.decoder.decode(payload)
         measurements = decoded_payload.get("measurements", [])
 
@@ -187,6 +189,7 @@ class My_Client:
             Performance_metadata = Get_Signal_Performance_metadata(metadata)
         
         #decode payload
+        payload = base64.b64decode(payload)
         decoded_payload = self.decoder.decode(payload)
         measurements = decoded_payload.get("measurements", [])
         measurements.append({"name": "raw_payload", "value": payload})
