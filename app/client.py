@@ -59,7 +59,17 @@ class My_Client:
         try: #get metadata and payload received
             metadata = parse_message_payload(message.payload.decode("utf-8"))
             payload = metadata.get("data")
-            if not payload:
+            fport = metadata.get("fport")
+            if fport == 0:
+                raise ValueError(
+                    """
+                    fport 0 detected, payload size may be too big for current data rate
+                    - At Data Rate 0 (SF10): Maximum payload size is 11 bytes.
+                    - At Data Rate 1 (SF9): Maximum payload size is 53 bytes.
+                    - At Data Rate 2 (SF8): Maximum payload size is 125 bytes.
+                    - At Data Rate 3 (SF7): Maximum payload size is 222 bytes.
+                    """)
+            elif not payload:
                 raise ValueError("Message did not contain data.")
         except (ValueError, KeyError, json.JSONDecodeError) as e:
             logging.error(f"[MQTT CLIENT] Failed to parse message: {e}")
@@ -80,7 +90,8 @@ class My_Client:
             return
         
         #decode payload
-        measurements = self.decoder.decode(payload)
+        decoded_payload = self.decoder.decode(payload)
+        measurements = decoded_payload["measurements"]
 
         # Don't publish raw payload if requested      
         if not self.args.dry_raw_payload:
@@ -152,17 +163,34 @@ class My_Client:
 
     def log_measurements(self,message):
 
-        try: #get metadata and measurements received
+        try: #get metadata and payload received
             metadata = parse_message_payload(message.payload.decode("utf-8"))
-            measurements = metadata["object"]["measurements"]
-        except:
-            logging.error("[MQTT CLIENT] Message did not contain measurements.")
+            payload = metadata.get("data")
+            fport = metadata.get("fport")
+            if fport == 0:
+                raise ValueError(
+                    """
+                    fport 0 detected, payload size may be too big for current data rate
+                    - At Data Rate 0 (SF10): Maximum payload size is 11 bytes.
+                    - At Data Rate 1 (SF9): Maximum payload size is 53 bytes.
+                    - At Data Rate 2 (SF8): Maximum payload size is 125 bytes.
+                    - At Data Rate 3 (SF7): Maximum payload size is 222 bytes.
+                    """)
+            elif not payload:
+                raise ValueError("Message did not contain data.")
+        except (ValueError, KeyError, json.JSONDecodeError) as e:
+            logging.error(f"[MQTT CLIENT] Failed to parse message: {e}")
             return
 
         if self.args.signal_strength_indicators:
             Performance_vals = Get_Signal_Performance_values(metadata)
             Performance_metadata = Get_Signal_Performance_metadata(metadata)
         
+        #decode payload
+        decoded_payload = self.decoder.decode(payload)
+        measurements = decoded_payload["measurements"]
+        measurements.append({"name": "raw_payload", "value": payload})
+
         for measurement in measurements:
             # Skip the measurement if it's in the ignore list
             if measurement["name"] in self.args.ignore:
