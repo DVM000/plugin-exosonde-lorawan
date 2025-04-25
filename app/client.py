@@ -91,7 +91,7 @@ class My_Client:
         
         #decode payload
         decoded_payload = self.decoder.decode(payload)
-        measurements = decoded_payload["measurements"]
+        measurements = decoded_payload.get("measurements", [])
 
         # Don't publish raw payload if requested      
         if not self.args.dry_raw_payload:
@@ -188,7 +188,7 @@ class My_Client:
         
         #decode payload
         decoded_payload = self.decoder.decode(payload)
-        measurements = decoded_payload["measurements"]
+        measurements = decoded_payload.get("measurements", [])
         measurements.append({"name": "raw_payload", "value": payload})
 
         for measurement in measurements:
