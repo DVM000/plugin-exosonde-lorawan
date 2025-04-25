@@ -37,14 +37,15 @@ class Decoder: # This class is used to decode the data received from the sensor
         date, time, version, device_id, df = self.process_packet(payload, lookup_dict)
         
         # Build dictionary
-        measurements = [{"name": "device_id", "value": device_id}, 
-                        {"name": "version", "value": version}]
+        measurements = [{"name": "device_id", "value": device_id, "unit": ""}, 
+                        {"name": "version", "value": version, "unit": ""}]
                         
         for _, row in df.iterrows():
             if row['Status'] != "Available": # skip NaN values (status!=0)
                 continue
-            data = {"name": row['Parameter'].replace(' ','_').split(',')[0], 
-                    "value": row['Value']}
+            data = {"name": row['Parameter'].split(',')[0].replace(' ','_'), 
+                    "value": row['Value'],
+                    "unit": row['Parameter'].split(',')[1].replace(' ','')}
             measurements.append( data )
     
         payload = {"measurements": measurements}
