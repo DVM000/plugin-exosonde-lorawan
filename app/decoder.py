@@ -39,9 +39,13 @@ class Decoder: # This class is used to decode the data received from the sensor
         # Load lookup table for parameter names
         lookup_dict = self.load_lookup_table()   
     
-        date, time, df = self.process_packet(payload, lookup_dict)
+        # Decode parameters from packet
+        date, time, version, device_id, df = self.process_packet(payload, lookup_dict)
         
-        measurements = []
+        # Build dictionary
+        measurements = [{"name": "device_id", "value": device_id}, 
+                        {"name": "version", "value": version}]
+                        
         for _, row in df.iterrows():
             if row['Status'] != "Available": # skip NaN values (status!=0)
                 continue
@@ -136,7 +140,7 @@ class Decoder: # This class is used to decode the data received from the sensor
         
         print(f"({date} {time}) Packet from devID={device_id} v.{version}. #parameters: {len(decoded_data)}")
 
-        return date, time, pd.DataFrame(decoded_data)
+        return date, time, version, device_id, pd.DataFrame(decoded_data)
 
 # TESTING
 #decoder = Decoder()
