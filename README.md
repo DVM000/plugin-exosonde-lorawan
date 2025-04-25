@@ -11,7 +11,7 @@ Extracted information is published to Waggle system.
 
 ## Example Decoded Output
 
-```json
+```
 [
 {'measurements': 
    [   {'name': 'device_id', 'value': 18, 'unit': ''}, 
