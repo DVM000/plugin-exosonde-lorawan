@@ -1,18 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # Decoding data coming from EXO sensor via Arduino + loRaWAN
-import sys
 import struct
 from datetime import datetime
 import pandas as pd
 import crcmod
-from waggle.plugin import Plugin
-import base64
-import zlib
 import os
 import logging
-import argparse
-
 
 class Decoder: # This class is used to decode the data received from the sensor
 
@@ -29,9 +23,9 @@ class Decoder: # This class is used to decode the data received from the sensor
         if isinstance(payload, str):
            try:
                payload = bytes.fromhex(payload)
-               print("Converted to bytes: ", payload)
+               logging.debug("[DECODER] Converted to bytes: ", payload)
            except Exception as e:
-               print("Error converting payload to bytes: ", e)
+               logging.error("[DECODER] Error converting payload to bytes: ", e)
                return {"error": "invalid hex string"}
             
         self.crc8_func = crcmod.mkCrcFun(0x107, initCrc=0x00, rev=False)
@@ -59,7 +53,7 @@ class Decoder: # This class is used to decode the data received from the sensor
     def load_lookup_table(self, csv_file='../register_configuration.csv' ):
         # Load the correct lookup table from the uploaded CSV
         csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_file))
-        print(csv_file)
+        logging.debug(f"[DECODER] lookup table: {csv_file}")
         lookup_df = pd.read_csv(csv_file)
         filtered_df = lookup_df[(lookup_df['Read Holding Register'] >= 128) & 
                             (lookup_df['Read Holding Register'] <= 159)]
@@ -138,7 +132,7 @@ class Decoder: # This class is used to decode the data received from the sensor
                 'Value': value
             })
         
-        print(f"({date} {time}) Packet from devID={device_id} v.{version}. #parameters: {len(decoded_data)}")
+        logging.debug(f"[DECODER] processed packet: ({date} {time}) Packet from devID={device_id} v.{version}. #parameters: {len(decoded_data)}")
 
         return date, time, version, device_id, pd.DataFrame(decoded_data)
 
