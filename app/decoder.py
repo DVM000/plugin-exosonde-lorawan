@@ -52,10 +52,12 @@ class Decoder: # This class is used to decode the data received from the sensor
             param_name = row['Parameter'].split(',')[0].replace(' ','_')
             try:
                 param_unit = row['Parameter'].split(',')[1].replace(' ','')
+                dot_unit = "."+param_unit
             except:
                 param_unit = ""
+                dot_unit = ""
                 
-            data = {"name": param_name, 
+            data = {"name": 'env.'+param_name+dot_unit, # environmental data
                     "value": row['Value'],
                     "unit": param_unit}
             measurements.append( data )
