@@ -95,9 +95,11 @@ class My_Client:
         decoded_payload = self.decoder.decode(base64_decoded_payload)
         measurements = decoded_payload.get("measurements", [])
 
-        # log if measurements is not a list
-        if not isinstance(measurements, list):
-            logging.error(f"[MQTT CLIENT] Measurements returned from Decoder is not a list")
+        # Check measurements format
+        try:
+            self.check_measurements(measurements)
+        except ValueError as e:
+            logging.error(f"[MQTT CLIENT] {e}")
             return
 
         # if measurements is empty, log
@@ -225,6 +227,16 @@ class My_Client:
                 logging.info(f"[MQTT CLIENT] packet loss rate: {plr:.2f}%")
 
         return
+    
+    def check_measurements(self,measurements):
+        # log if measurements is not a list
+        if not isinstance(measurements, list):
+            raise ValueError(f"Measurements returned from Decoder is not a list")
+        
+        # Check if each item inside measurements is a dict with 'name' and 'value'
+        for idx, item in enumerate(measurements):
+            if not isinstance(item, dict) or "name" not in item or "value" not in item:
+                raise ValueError(f"Invalid measurement format at index {idx}: {item}")
 
     def run(self):
         logging.info(f"[MQTT CLIENT] connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
