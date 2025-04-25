@@ -43,9 +43,14 @@ class Decoder: # This class is used to decode the data received from the sensor
         for _, row in df.iterrows():
             if row['Status'] != "Available": # skip NaN values (status!=0)
                 continue
-            data = {"name": row['Parameter'].split(',')[0].replace(' ','_'), 
+            param_name = row['Parameter'].split(',')[0].replace(' ','_')
+            try:
+                param_unit = row['Parameter'].split(',')[1].replace(' ','')
+            except:
+                param_unit = ""
+            data = {"name": param_name, 
                     "value": row['Value'],
-                    "unit": row['Parameter'].split(',')[1].replace(' ','')}
+                    "unit": param_unit}
             measurements.append( data )
     
         payload = {"measurements": measurements}
