@@ -50,7 +50,7 @@ class Decoder: # This class is used to decode the data received from the sensor
         payload = {"measurements": measurements}
         return payload
      
-    def load_lookup_table(self, csv_file='../register_configuration.csv' ):
+    def load_lookup_table(self, csv_file='./register_configuration.csv' ):
         # Load the correct lookup table from the uploaded CSV
         csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_file))
         logging.debug(f"[DECODER] lookup table: {csv_file}")
