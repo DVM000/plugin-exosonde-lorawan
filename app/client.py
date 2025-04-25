@@ -1,6 +1,7 @@
 import logging
 import os
 import base64
+from datetime import datetime, timedelta
 import paho.mqtt.client as mqtt
 from waggle.plugin import Plugin
 from parse import *
@@ -76,9 +77,6 @@ class My_Client:
             logging.error(f"[MQTT CLIENT] Failed to parse message: {e}")
             return
 
-        #get chirpstack time and convert to time in nanoseconds
-        timestamp = convert_time(metadata["time"])
-
         #Get Lorawan signal performance vals
         if self.args.signal_strength_indicators:
             Performance_vals = Get_Signal_Performance_values(metadata)
@@ -92,8 +90,22 @@ class My_Client:
         
         #decode payload
         base64_decoded_payload = base64.b64decode(payload)
-        decoded_payload = self.decoder.decode(base64_decoded_payload)
+        decoded_payload, sensor_timestamp = self.decoder.decode(base64_decoded_payload)
         measurements = decoded_payload.get("measurements", [])
+
+        # Check if sensor timestamp is present
+        if sensor_timestamp:
+            # check if timestamp is in ISO-8601 datetime format
+            try:
+                self.check_timestamp(sensor_timestamp)
+            except ValueError as e:
+                logging.error(f"[MQTT CLIENT] {e}")
+                return
+            # Convert sensor timestamp to nanoseconds
+            timestamp = convert_time(sensor_timestamp)
+        else:
+            # Use the timestamp from the network server and convert to time in nanoseconds
+            timestamp = convert_time(metadata["time"])
 
         # Check measurements format
         try:
@@ -241,6 +253,11 @@ class My_Client:
         return
     
     def check_measurements(self,measurements):
+        """
+        Check if measurements is a list of dictionaries with 'name', 'value', and 'unit' keys.
+        examples:
+            - [{'name': 'temperature', 'value': 25.0, 'unit': 'C'}, {'name': 'humidity', 'value': 60.0, 'unit': '%'}]
+        """
         # log if measurements is not a list
         if not isinstance(measurements, list):
             raise ValueError("Measurements returned from Decoder is not a list")
@@ -253,6 +270,27 @@ class My_Client:
             missing_keys = [key for key in ["name", "value", "unit"] if key not in item]
             if missing_keys:
                 raise ValueError(f"Invalid measurement format at index {idx}, missing keys: {missing_keys}. Got: {item}")
+
+    def check_timestamp(self, timestamp):
+        """
+        Check if timestamp is in UTC ISO-8601 datetime format. "%Y-%m-%dT%H:%M:%S" or "%Y-%m-%dT%H:%M:%S.%f" with microseconds 
+        plus optional timezone (Z or +00:00).
+        examples:
+            - 2025-04-25T19:47:37.723532+00:00
+            - 2025-04-25T19:47:37Z
+        """
+        if not isinstance(timestamp, str):
+            raise ValueError("Timestamp must be a string.")
+
+        try:
+            # Try to parse the timestamp
+            parsed_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        except ValueError as e:
+            raise ValueError(f"Invalid ISO-8601 timestamp format: {timestamp}") from e
+
+        # Check that it is in UTC
+        if parsed_time.tzinfo is None or parsed_time.tzinfo.utcoffset(parsed_time) != timedelta(0):
+            raise ValueError(f"Timestamp is not in UTC timezone: {timestamp}")
 
     def run(self):
         logging.info(f"[MQTT CLIENT] connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
