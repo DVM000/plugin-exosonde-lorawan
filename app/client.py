@@ -58,9 +58,11 @@ class My_Client:
 
         try: #get metadata and payload received
             metadata = parse_message_payload(message.payload.decode("utf-8"))
-            payload = metadata["data"]
-        except:
-            logging.error("[MQTT CLIENT] Message did not contain data.")
+            payload = metadata.get("data")
+            if not payload:
+                raise ValueError("Message did not contain data.")
+        except (ValueError, KeyError, json.JSONDecodeError) as e:
+            logging.error(f"[MQTT CLIENT] Failed to parse message: {e}")
             return
 
         #get chirpstack time and convert to time in nanoseconds
