@@ -11,9 +11,10 @@ from zoneinfo import ZoneInfo
 
 class Decoder: # This class is used to decode the data received from the sensor
 
-    def __init__(self, sensor_timezone='America/Chicago', sensor_time_is_utc=False): # Set your data/timezone here
-        self.sensor_timezone = sensor_timezone
-        self.sensor_time_is_utc = sensor_time_is_utc
+    def __init__(self): 
+        # Set your data/timezone here
+        self.sensor_timezone = 'America/Chicago'
+        self.sensor_time_is_utc = False
 
     def decode(self, payload):
         # Decode the payload and return a dictionary with the decoded values in this structure:
@@ -52,7 +53,7 @@ class Decoder: # This class is used to decode the data received from the sensor
             logging.debug("[DECODER] Packet time appears to be local; converting to UTC.")
             local_zone = ZoneInfo(self.sensor_timezone)
             dt = dt_naive.replace(tzinfo=local_zone).astimezone(timezone.utc)
-        logging.debug(f"[DECODER] Packet time: {dt_naive} (local) -> {dt} (UTC)")
+            logging.debug(f"[DECODER] Packet time: {dt_naive} ({self.sensor_timezone}) -> {dt} (UTC)")
         timestamp = dt.isoformat(timespec='seconds')
    
         # Build dictionary of parameters
