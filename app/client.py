@@ -1,7 +1,7 @@
 import logging
 import os
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime
 import paho.mqtt.client as mqtt
 from waggle.plugin import Plugin
 from parse import *
@@ -40,7 +40,22 @@ class My_Client:
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             logging.info("[MQTT CLIENT] Connected to MQTT broker")
-            client.subscribe(self.args.mqtt_subscribe_topic)
+
+            # topics
+            topics = []
+            qos = 0 # Quality of Service
+            if self.args.dev_eui:
+                for dev_eui in self.args.dev_eui:
+                    topic = (f"application/+/device/{dev_eui}/#", qos)
+                    topics.append(topic)
+            else:
+                logging.info(f"[MQTT CLIENT] No Device EUI(s) provided, subscribing to {self.args.mqtt_subscribe_topic}")
+                logging.warning(f"[MQTT CLIENT] WARNING! Subscribing to all devices may cause issues if Decoder class is not able to decode all devices.")
+                topic = (f"{self.args.mqtt_subscribe_topic}", qos)
+                topics.append(topic)
+
+            # subscribe to topics
+            client.subscribe(topics)
         else:
             logging.error(f"[MQTT CLIENT] Connection to MQTT broker failed with code {rc}") 
         return
@@ -52,7 +67,7 @@ class My_Client:
 
     @staticmethod
     def on_log(client, obj, level, string):
-        logging.debug(f"[MQTT CLIENT] on_log: {string}") #prints if args.debug = true
+        logging.debug(f"[MQTT CLIENT]: {string}") #prints if args.debug = true
         return
 
     def publish_message(self, client, userdata, message):

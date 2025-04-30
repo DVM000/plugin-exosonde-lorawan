@@ -60,6 +60,13 @@ def main():
         help="Pass flag to NOT publish raw payload to beehive",
         type=bool
     )
+    parser.add_argument(
+        "--dev_eui",
+        nargs="*",  # 0 or more values expected => creates a list
+        type=str,
+        default=[],
+        help="Device EUI(s) to retrieve packets from. If empty none will be retrieved (ex: --dev_eui 1234567890abcdef 5554567691abcdef). They MUST be registered in Network server!",
+    )
     
     #get args
     args = parser.parse_args()
@@ -70,6 +77,11 @@ def main():
         format="%(asctime)s %(message)s",
         datefmt="%Y/%m/%d %H:%M:%S",
     )
+
+    #check if dev_eui is empty
+    if args.dev_eui == []:
+        logging.error("[MAIN] Argument --dev_eui was not provided, no packets can be retrieved. Set the argument, to configure which devices to subcribe to. see --help or plugin documentation, Exiting...")
+        exit(1)
 
     #configure client
     mqtt_client = My_Client(args)
