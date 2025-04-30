@@ -7,7 +7,18 @@ import pandas as pd
 import crcmod
 import os
 import logging
+from typing import Tuple, List, TypedDict
 from zoneinfo import ZoneInfo
+
+# Define types for the payload and timestamp
+Timestamp = str
+
+class Measurement(TypedDict):
+    name: str
+    value: float
+
+class Payload(TypedDict):
+    measurements: List[Measurement]
 
 class Decoder: # This class is used to decode the data received from the sensor
 
@@ -16,7 +27,7 @@ class Decoder: # This class is used to decode the data received from the sensor
         self.sensor_timezone = 'America/Chicago'
         self.sensor_time_is_utc = False
 
-    def decode(self, payload):
+    def decode(self, payload: bytes) -> Tuple[Payload, Timestamp]:
         # Decode the payload and return a dictionary with the decoded values in this structure:
         # payload = {
         #   measurements:[
