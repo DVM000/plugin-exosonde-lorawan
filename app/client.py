@@ -98,7 +98,6 @@ class My_Client:
             # check the timestamp
             try:
                 self.check_timestamp(sensor_timestamp)
-                self.is_packet_time_utc(sensor_timestamp)
             except ValueError as e:
                 logging.error(f"[MQTT CLIENT] {e}")
                 return
@@ -285,13 +284,15 @@ class My_Client:
 
         try:
             # Try to parse the timestamp
-            parsed_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
         except ValueError as e:
             raise ValueError(f"Invalid ISO-8601 timestamp format: {timestamp}") from e
 
         # Check that it is in UTC
-        if parsed_time.tzinfo is None or parsed_time.tzinfo.utcoffset(parsed_time) != timedelta(0):
-            raise ValueError(f"Timestamp is not in UTC timezone: {timestamp}")
+        try:
+            self.is_packet_time_utc(timestamp)
+        except ValueError as e:
+            raise ValueError(f"{e}")
     
     @staticmethod
     def is_packet_time_utc(packet_naive_dt, tolerance_minutes=30):
@@ -299,6 +300,9 @@ class My_Client:
         Determines whether the given packet time is in UTC by comparing to system UTC time.
         Assumes `packet_naive_dt` is a naive datetime object (no tzinfo).
         """
+        # Parse the ISO 8601 timestamp string
+        packet_naive_dt = datetime.fromisoformat(packet_naive_dt)
+
         # Get the current UTC time based on the system clock
         now_utc = datetime.now(timezone.utc)
         
