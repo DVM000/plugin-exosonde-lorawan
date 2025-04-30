@@ -312,7 +312,7 @@ class My_Client:
 
         # If difference is small (e.g., < 5 minutes), assume packet was in UTC
         if delta_seconds > (tolerance_minutes * 60):
-            raise ValueError(f"Packet time is not in UTC. Difference: {delta_seconds} seconds")
+            raise ValueError(f"ERROR, Packet time is not in UTC. Difference: {delta_seconds} seconds")
 
     def run(self):
         logging.info(f"[MQTT CLIENT] connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
