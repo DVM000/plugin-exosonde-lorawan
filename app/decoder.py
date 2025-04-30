@@ -7,8 +7,13 @@ import pandas as pd
 import crcmod
 import os
 import logging
+from zoneinfo import ZoneInfo
 
 class Decoder: # This class is used to decode the data received from the sensor
+
+    def __init__(self, sensor_timezone='America/Chicago', sensor_time_is_utc=False): # Set your data/timezone here
+        self.sensor_timezone = sensor_timezone
+        self.sensor_time_is_utc = sensor_time_is_utc
 
     def decode(self, payload):
         # Decode the payload and return a dictionary with the decoded values in this structure:
@@ -35,14 +40,20 @@ class Decoder: # This class is used to decode the data received from the sensor
     
         # Decode parameters from packet
         date, time, version, device_id, df = self.process_packet(payload, lookup_dict)
-        
+
         # Get measurement timestamp ISO-8601
-        dt = datetime.strptime(date+'-'+time,'%d-%m-%Y-%H:%M:%S')
-        logging.debug(f"[DECODER] Timestamp local?: {dt}")
-        dt = dt.replace(tzinfo=timezone.utc) # UTC
-        logging.debug(f"[DECODER] Timestamp UTC: {dt}")
+        dt_naive = datetime.strptime(date + '-' + time, '%d-%m-%Y-%H:%M:%S')
+        if self.is_packet_time_utc(dt_naive) or self.sensor_time_is_utc:
+            # If the packet time is in UTC or sensor time is set to UTC, assign UTC timezone
+            logging.debug("[DECODER] Packet time appears to be in UTC.")
+            dt = dt_naive.replace(tzinfo=timezone.utc)
+        else:
+            # If the packet time is not in UTC, assume it's local time and convert to UTC
+            logging.debug("[DECODER] Packet time appears to be local; converting to UTC.")
+            local_zone = ZoneInfo(self.sensor_timezone)
+            dt = dt_naive.replace(tzinfo=local_zone).astimezone(timezone.utc)
+        logging.debug(f"[DECODER] Packet time: {dt_naive} (local) -> {dt} (UTC)")
         timestamp = dt.isoformat(timespec='seconds')
-        logging.debug(f"[DECODER] Timestamp UTC seconds: {timestamp}")
    
         # Build dictionary of parameters
         measurements = [{"name": "device_id", "value": device_id, "unit": ""}, 
@@ -153,6 +164,22 @@ class Decoder: # This class is used to decode the data received from the sensor
         logging.debug(f"[DECODER] processed packet: ({date} {time}) Packet from devID={device_id} v.{version}. #parameters: {len(decoded_data)}")
 
         return date, time, version, device_id, pd.DataFrame(decoded_data)
+    
+    @staticmethod
+    def is_packet_time_utc(packet_naive_dt, tolerance_minutes=30):
+        """
+        Determines whether the given packet time is in UTC by comparing to system UTC time.
+        Assumes `packet_naive_dt` is a naive datetime object (no tzinfo).
+        """
+        # Get the current UTC time based on the system clock
+        now_utc = datetime.now(timezone.utc)
+        
+        # Assume packet time might be UTC, so assign UTC and compare
+        packet_as_utc = packet_naive_dt.replace(tzinfo=timezone.utc)
+        delta_seconds = abs((now_utc - packet_as_utc).total_seconds())
+
+        # If difference is small (e.g., < 5 minutes), assume packet was in UTC
+        return delta_seconds < (tolerance_minutes * 60)
 
 # TESTING
 #decoder = Decoder()
