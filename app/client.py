@@ -95,7 +95,7 @@ class My_Client:
 
         # Check if sensor timestamp is present
         if sensor_timestamp:
-            # check if timestamp is in ISO-8601 datetime format
+            # check the timestamp
             try:
                 self.check_timestamp(sensor_timestamp)
             except ValueError as e:
@@ -284,13 +284,35 @@ class My_Client:
 
         try:
             # Try to parse the timestamp
-            parsed_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
         except ValueError as e:
             raise ValueError(f"Invalid ISO-8601 timestamp format: {timestamp}") from e
 
         # Check that it is in UTC
-        if parsed_time.tzinfo is None or parsed_time.tzinfo.utcoffset(parsed_time) != timedelta(0):
-            raise ValueError(f"Timestamp is not in UTC timezone: {timestamp}")
+        try:
+            self.is_packet_time_utc(timestamp)
+        except ValueError as e:
+            raise ValueError(f"{e}")
+    
+    @staticmethod
+    def is_packet_time_utc(packet_naive_dt, tolerance_minutes=30):
+        """
+        Determines whether the given packet time is in UTC by comparing to system UTC time.
+        Assumes `packet_naive_dt` is a naive datetime object (no tzinfo).
+        """
+        # Parse the ISO 8601 timestamp string
+        packet_naive_dt = datetime.fromisoformat(packet_naive_dt)
+
+        # Get the current UTC time based on the system clock
+        now_utc = datetime.now(timezone.utc)
+        
+        # Assume packet time might be UTC, so assign UTC and compare
+        packet_as_utc = packet_naive_dt.replace(tzinfo=timezone.utc)
+        delta_seconds = abs((now_utc - packet_as_utc).total_seconds())
+
+        # If difference is small (e.g., < 5 minutes), assume packet was in UTC
+        if delta_seconds > (tolerance_minutes * 60):
+            raise ValueError(f"ERROR, Packet time is not in UTC. Difference: {delta_seconds} seconds")
 
     def run(self):
         logging.info(f"[MQTT CLIENT] connecting [{self.args.mqtt_server_ip}:{self.args.mqtt_server_port}]...")
