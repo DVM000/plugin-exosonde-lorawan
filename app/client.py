@@ -49,7 +49,7 @@ class My_Client:
                     topic = (f"application/+/device/{dev_eui}/#", qos)
                     topics.append(topic)
             else:
-                logging.info(f"[MQTT CLIENT] No dev_eui provided, subscribing to {self.args.mqtt_subscribe_topic}")
+                logging.info(f"[MQTT CLIENT] No Device EUI(s) provided, subscribing to {self.args.mqtt_subscribe_topic}")
                 logging.warning(f"[MQTT CLIENT] WARNING! Subscribing to all devices may cause issues if Decoder class is not able to decode all devices.")
                 topic = (f"{self.args.mqtt_subscribe_topic}", qos)
                 topics.append(topic)
