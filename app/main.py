@@ -79,7 +79,7 @@ def main():
     )
 
     #check if dev_eui is empty
-    if args.dev_eui:
+    if args.dev_eui == []:
         logging.error("[MAIN] Argument --dev_eui was not provided, no packets can be retrieved. Set the argument, to configure which devices to subcribe to. see --help or plugin documentation, Exiting...")
         exit(1)
 
