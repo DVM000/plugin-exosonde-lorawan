@@ -38,8 +38,11 @@ class Decoder: # This class is used to decode the data received from the sensor
         
         # Get measurement timestamp ISO-8601
         dt = datetime.strptime(date+'-'+time,'%d-%m-%Y-%H:%M:%S')
+        logging.debug(f"[DECODER] Timestamp local?: {dt}")
         dt = dt.replace(tzinfo=timezone.utc) # UTC
+        logging.debug(f"[DECODER] Timestamp UTC: {timestamp}")
         timestamp = dt.isoformat(timespec='seconds')
+        logging.debug(f"[DECODER] Timestamp UTC seconds: {timestamp}")
    
         # Build dictionary of parameters
         measurements = [{"name": "device_id", "value": device_id, "unit": ""}, 
