@@ -40,7 +40,7 @@ class Decoder: # This class is used to decode the data received from the sensor
         dt = datetime.strptime(date+'-'+time,'%d-%m-%Y-%H:%M:%S')
         logging.debug(f"[DECODER] Timestamp local?: {dt}")
         dt = dt.replace(tzinfo=timezone.utc) # UTC
-        logging.debug(f"[DECODER] Timestamp UTC: {timestamp}")
+        logging.debug(f"[DECODER] Timestamp UTC: {dt}")
         timestamp = dt.isoformat(timespec='seconds')
         logging.debug(f"[DECODER] Timestamp UTC seconds: {timestamp}")
    
