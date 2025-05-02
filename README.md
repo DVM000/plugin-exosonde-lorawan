@@ -23,6 +23,33 @@ Extracted information is published to Waggle system.
 }
 ```
 
+## Example Job Spec
+
+This is an example Job spec for usage with Sage
+
+```
+name: W027-lorawan-codec-exosonde3
+plugins:
+- name: lorawan-codec-exosonde3
+  pluginSpec:
+    image: http://registry.sagecontinuum.org/deliavm/plugin-exosonde-lorawan:0.1.1
+    args:
+    - --dev_eui #<--- REQUIRED ARGUMENT
+    - 95d6ec7dced4ba39 #<--- add more as needed each in new line 
+    - --signal-strength-indicators
+    - --plr
+    - "3600"
+    volume: {}
+nodeTags: []
+nodes:
+  W027: true
+scienceRules:
+- 'schedule("lorawan-codec-exosonde3"): cronjob("lorawan-codec-exosonde3", "* * *
+  * *")'
+successCriteria: []
+
+```
+
 
 
 
