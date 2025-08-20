@@ -1,0 +1,59 @@
+Code,Parameter,Scale Low,Scale High
+1,"Temperature, C",-50,605.35
+2,"Temperature, F",-50,605.35
+3,"Temperature, K",0,655.35
+4,"Conductivity, ms/cm",0,655.35
+5,"Conductivity, us/cm",0,65535
+6,"Specific Conductance, ms/cm",0,655.35
+7,"Specific Conductance, us/cm",0,65535
+10,"TDS, g/L",0,65.535
+12,"Salinity, PPT",0,65.535
+17,"pH, mV",-1638.4,1638.35
+18,pH,-27.768,39.767
+19,"ORP, mV",-1638.4,1638.35
+20,"Pressure, psia",-50,605.35
+21,"Pressure, psig",-50,605.35
+22,"Depth, m",-50,605.35
+23,"Depth, ft",-50,605.35
+28,"Battery, V",0,65.535
+47,"NH3(Ammonia), mg/L",0,655.35
+48,"NH4(Ammonium), mg/L",0,655.35
+51,"Date, DDMMYY",,
+52,"Date, MMDDYY",,
+53,"Date, YYMMDD",,
+54,"Time, HHMMSS",,
+95,"TDS, kg/L",0,65.535
+101,"NO3(Nitrate), mV",-1638.4,1638.35
+106,"NO3(Nitrate), mg/L",0,655.35
+108,"NH4(Ammonium), mV",-1638.4,1638.35
+110,"TDS, mg/L",0,65535
+112,"Chloride, mg/L",0,655.35
+145,"Chloride, mV",-1638.4,1638.35
+190,"TSS, mg/L",0,6553.5
+191,"TSS, g/L",0,6.5535
+193,"Chlorophyll, ug/L",0,655.35
+194,"Chlorophyll, RFU",0,655.35
+211,"ODO, %Sat",0,655.35
+212,"ODO, mg/L",0,65.535
+214,"ODO, %Sat Local",0,655.35
+216,"BGA-PC, RFU",0,655.35
+218,"BGA-PE, RFU",0,655.35
+223,"Turbidity, FNU",0,6553.5
+224,"Turbidity, Raw",0,655.35
+225,"BGA-PC, ug/L",0,655.35
+226,"BGA-PE, ug/L",0,655.35
+227,"fDOM, RFU",0,655.35
+228,"fDOM, QSU",0,655.35
+229,"Wiper Position, V",0,65.535
+230,"External Power, V",0,65.535
+231,"BGA-PC, Raw",0,655.35
+232,"BGA-PE, Raw",0,655.35
+233,"fDOM, Raw",0,655.35
+234,"Chlorophyll, Raw",0,655.35
+235,"Potassium, mV",-1638.4, 1638.35
+236,"Potassium, mg/L",0,655.35
+237,"nLF Conductivity, ms/cm",0,655.35
+238,"NLF Conductivity, us/cm",0,65535
+239,"Wiper Peak Current, mA",0,65.535
+240,"Vertical Position, m",-50,605.35
+241,"Vertical Position, ft",-50,605.35
