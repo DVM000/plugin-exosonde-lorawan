@@ -92,14 +92,12 @@ class Decoder: # This class is used to decode the data received from the sensor
         payload = {"measurements": measurements}
         return payload, timestamp
      
-    def load_lookup_table(self, csv_file='./register_configuration.csv' ):
+    def load_lookup_table(self, csv_file='./parameters.csv' ):
         # Load the correct lookup table from the uploaded CSV
         csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_file))
         logging.debug(f"[DECODER] lookup table: {csv_file}")
         lookup_df = pd.read_csv(csv_file)
-        filtered_df = lookup_df[(lookup_df['Read Holding Register'] >= 128) & 
-                            (lookup_df['Read Holding Register'] <= 159)]
-        lookup_dict = dict(zip(filtered_df['Read Holding Register Value'], filtered_df['Specific Parameter']))
+        lookup_dict = dict(zip(lookup_df['Code'], lookup_df['Parameter']))
         return lookup_dict #  dictionary of parameter names indexed by register code
 
     @staticmethod
