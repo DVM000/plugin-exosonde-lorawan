@@ -1,5 +1,5 @@
 name: "plugin-exosonde-lorawan"
-version: "0.2.0"
+version: "0.3.0"
 description: "Read parameters from EXO sonde via lorawan and publish data"
 keywords: "EXO multi-parameter Sonde"
 authors: "Delia Velasco-Montero <delia@imse-cnm.csic.es>"
