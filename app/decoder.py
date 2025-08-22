@@ -74,6 +74,7 @@ class Decoder: # This class is used to decode the data received from the sensor
                         
         for _, row in df.iterrows():
             if row['Status'] != "Available": # skip NaN values (status!=0)
+                logging.debug(f"[DECODER] Skipping unavailable parameter: {row['Parameter']}")
                 continue
                 
             param_name = row['Parameter'].split(',')[0].replace(' ','_')
